@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
         plugin = {"pretty"},
         features = {"src/test/resources/features"},
         glue = {"com.screenplay"},
-        tags = "@createStore"
+        tags = "@deleteStore"
 )
 public class Runner {
 

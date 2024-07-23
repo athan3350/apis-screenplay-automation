@@ -1,6 +1,7 @@
 package com.screenplay.stepdefinitions.general;
 
 import com.screenplay.tasks.pet.CreatePetTask;
+import com.screenplay.tasks.pet.DeletePetTask;
 import com.screenplay.tasks.pet.ValidatePetCreationResponseTask;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.When;
@@ -18,11 +19,20 @@ public class PetSteps {
         );
     }
 
-    @And("He\\She will verify that the information from the pet creation is correct")
+    @When("deletes a pet")
+    public void deletesAPet(List<Map<String, String>> structureData) {
+        OnStage.theActorInTheSpotlight().attemptsTo(
+                DeletePetTask.now(structureData)
+        );
+    }
+
+    @And("will verify that the information from the pet creation is correct")
     public void heSheWillVerifyThatTheInformationFromThePetCreationIsCorrect(List<Map<String, String>> structureData) {
         OnStage.withCurrentActor(
                 ValidatePetCreationResponseTask.validate(structureData)
         );
     }
+
+
 }
 
