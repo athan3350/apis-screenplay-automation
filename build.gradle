@@ -1,0 +1,79 @@
+group 'qa'
+version '1.0-SNAPSHOT'
+repositories {
+    mavenCentral()
+}
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:${project.'serenity-core.version'}")
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.3"
+    }
+}
+apply plugin: 'java'
+apply plugin: 'net.serenity-bdd.aggregator'
+apply plugin: "org.sonarqube"
+
+
+dependencies {
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    implementation "net.serenity-bdd:serenity-junit:${project.'serenity-core.version'}"
+    implementation "net.serenity-bdd:serenity-core:${project.'serenity-core.version'}"
+    implementation "net.serenity-bdd:serenity-screenplay:${project.'serenity-screenplay.version'}"
+    implementation "net.serenity-bdd:serenity-screenplay-rest:${project.'serenity-screenplay-rest.version'}"
+    implementation "net.serenity-bdd:serenity-cucumber6:${project.'serenity-cucumber6.version'}"
+    implementation "io.rest-assured:json-schema-validator:${project.'json-schema-validator.version'}"
+    implementation "io.cucumber:cucumber-java:${project.'cucumber-java.version'}"
+    implementation "org.json:json:${project.'org.json.version'}"
+    implementation "org.bouncycastle:bcprov-jdk15on:${project.'org.bouncycastle'}"
+    implementation "commons-codec:commons-codec:${project.'commons.codec'}"
+    implementation "log4j:log4j:${project.'log4j.version'}"
+    implementation "com.googlecode.json-simple:json-simple:${project.'json-simple.version'}"
+    implementation "org.everit.json:org.everit.json.schema:${project.'everit.json.version'}"
+    testImplementation "org.slf4j:slf4j-simple:${project.'slf4j-simple.version'}"
+    testImplementation "org.hamcrest:hamcrest-core:${project.'org.hamcrest.version'}"
+    compileOnly "org.projectlombok:lombok:${project.'projectlombok.version'}"
+    annotationProcessor "org.projectlombok:lombok:${project.'projectlombok.version'}"
+    testCompileOnly "org.projectlombok:lombok:${project.'projectlombok.version'}"
+    implementation group: 'net.serenity-bdd', name: 'serenity-ensure', version: '2.0.49'
+    testAnnotationProcessor "org.projectlombok:lombok:${project.'projectlombok.version'}"
+    testImplementation "org.assertj:assertj-core:${project.'assertj.version'}"
+
+    configurations {
+        cucumberRuntime {
+            extendsFrom testImplementation
+        }
+    }
+}
+test {
+
+
+    testLogging {
+        showStandardStreams = true
+    }
+    testLogging.showStandardStreams = true
+    gradle.startParameter.continueOnFailure = true
+    systemProperties System.getProperties()
+    test.finalizedBy(aggregate)
+}
+sourceCompatibility = "${project.'java.version'}'"
+gradle.startParameter.continueOnFailure = true
+group = 'petStore'
+version = '1.0-SNAPSHOT'
+description = 'pet-store'
+
+def tags = (findProperty('tags') == null) ? 'not @Ignore' : findProperty('tags') + ' and not @Ignore'
+
+tasks.register('cucumber') {
+
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "net.serenitybdd.cucumber.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin', 'pretty', '--glue', 'com.screenplay', 'src/test/resources/features/', '--tags', "${tags}"]
+        }
+    }
+}
